@@ -23,6 +23,7 @@ public final class UsuarioFactory {
                                  String direccion,
                                  String telefono,
                                  String email,
+                                 String documentoIdentidad,
                                  BigDecimal salarioBase,
                                  Integer idRol) {
 
@@ -32,6 +33,10 @@ public final class UsuarioFactory {
             errors.add(new DomainValidationException.Validacion("nombres", "nombres es requerido"));
         if (apellidos == null || apellidos.isBlank())
             errors.add(new DomainValidationException.Validacion("apellidos", "apellidos es requerido"));
+
+        if (documentoIdentidad == null || documentoIdentidad.isBlank())
+            errors.add(new DomainValidationException.Validacion("documentoIdentidad", "Documento Identidad es requerido"));
+
 
         if (email == null || email.isBlank()) {
             errors.add(new DomainValidationException.Validacion("correo_electronico", "correo_electronico es requerido"));
@@ -59,6 +64,7 @@ public final class UsuarioFactory {
                 .email(email.trim())
                 .salarioBase(salarioBase)
                 .idRol(idRol)
+                .documentoIdentidad(documentoIdentidad)
                 .build();
     }
 }

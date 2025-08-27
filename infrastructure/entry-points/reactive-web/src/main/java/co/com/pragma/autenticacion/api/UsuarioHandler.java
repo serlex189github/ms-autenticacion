@@ -21,17 +21,41 @@ public class UsuarioHandler {
     private final TransactionalOperator transactionalOperator;
     private final UsuarioUseCase usuarioUseCase; // o tu fachada/repos
 
+//    public Mono<ServerResponse> listenSaveUsuario(ServerRequest req) {
+//
+//        log.debug("registrar-usuario:request:start path={} method={}",
+//                req.path(), req.methodName());
+//
+//        return req.bodyToMono(Usuario.class)
+//                .doOnNext(u -> log.debug("registrar-usuario:payload email={}", u.getEmail()))
+//                .map(r -> UsuarioFactory.create(
+//                        r.getNombre(), r.getApellido(), r.getFechaNacimiento(),
+//                        r.getDireccion(), r.getTelefono(), r.getEmail(),
+//                        r.getSalarioBase(), r.getIdRol()))
+//                .flatMap(usuarioUseCase::saveUsuario)
+//                .as(transactionalOperator::transactional)
+//                .flatMap(saved -> ServerResponse
+//                        .created(req.uriBuilder().path("/{id}").build(saved.getIdUsuario()))
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .bodyValue(saved));
+//    }
+
     public Mono<ServerResponse> listenSaveUsuario(ServerRequest req) {
+        log.debug("registrar-usuario:request:start path={} method={}", req.path(), req.method().name());
 
-        log.debug("registrar-usuario:request:start path={} method={}",
-                req.path(), req.methodName());
-
-        return req.bodyToMono(Usuario.class)
-                .doOnNext(u -> log.debug("registrar-usuario:payload email={}", u.getEmail()))
+        return req.bodyToMono(RegistrarUsuarioRequest.class)
+                .doOnNext(r -> log.debug("registrar-usuario:payload email={}", r.email()))
                 .map(r -> UsuarioFactory.create(
-                        r.getNombre(), r.getApellido(), r.getFechaNacimiento(),
-                        r.getDireccion(), r.getTelefono(), r.getEmail(),
-                        r.getSalarioBase(), r.getIdRol()))
+                        r.nombre(),
+                        r.apellido(),
+                        r.fechaNacimiento(),
+                        r.direccion(),
+                        r.telefono(),
+                        r.email(),
+                        r.documentoIdentidad(),
+                        r.salarioBase(),
+                        r.idRol()
+                ))
                 .flatMap(usuarioUseCase::saveUsuario)
                 .as(transactionalOperator::transactional)
                 .flatMap(saved -> ServerResponse
