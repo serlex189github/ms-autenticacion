@@ -15,10 +15,6 @@ import java.util.regex.Pattern;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class Usuario {
-    private static final BigDecimal SALARIO_MIN = new BigDecimal("0");
-    private static final BigDecimal SALARIO_MAX = new BigDecimal("15000000");
-    private static final Pattern EMAIL_PATTERN =
-            Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
 
     private Integer idUsuario;
 

@@ -6,14 +6,30 @@ import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.UUID;
-
 @RequiredArgsConstructor
 public class UsuarioUseCase {
     private  final UsuarioRepository usuarioRepository;
 
+
+//    public Mono<Usuario> saveUsuario(Usuario usuario) {
+//        return usuarioRepository.save(usuario);
+//    }
+
+
     public Mono<Usuario> saveUsuario(Usuario usuario) {
-        return usuarioRepository.save(usuario);
+        // Validaciones mínimas (tu dominio puede validar más)
+        if (usuario.getNombre() == null || usuario.getNombre().isBlank())
+            return Mono.error(new IllegalArgumentException("nombres requerido"));
+        if (usuario.getApellido() == null || usuario.getApellido().isBlank())
+            return Mono.error(new IllegalArgumentException("apellidos requerido"));
+        if (usuario.getEmail() == null || usuario.getEmail().isBlank())
+            return Mono.error(new IllegalArgumentException("correo_electronico requerido"));
+
+        return usuarioRepository.existsByEmail(usuario.getEmail())
+                .flatMap(exists -> {
+                    if (exists) return Mono.error(new IllegalStateException("El correo ya existe"));
+                    return usuarioRepository.save(usuario);
+                });
     }
 
     public Mono<Usuario> updateUsuario(Usuario task) {

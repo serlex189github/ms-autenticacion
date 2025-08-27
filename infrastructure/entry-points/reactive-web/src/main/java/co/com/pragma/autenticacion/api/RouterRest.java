@@ -15,10 +15,10 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 public class RouterRest {
 
     private final UsuarioPath usuarioPath;
-    private final Handler usuarioHandler;
+    private final UsuarioHandler usuarioHandler;
 
     @Bean
-    public RouterFunction<ServerResponse> routerFunction(Handler handler) {
-        return route(POST(usuarioPath.getUsuarios()), usuarioHandler::listenSaveUsuario);
+    public RouterFunction<ServerResponse> routerFunction(UsuarioHandler usuarioHandler) {
+        return route(POST(usuarioPath.getUsuarios()), this.usuarioHandler::listenSaveUsuario);
     }
 }
