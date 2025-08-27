@@ -4,13 +4,12 @@ import co.com.pragma.autenticacion.model.usuario.Usuario;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.UUID;
 
 public interface UsuarioRepository {
 
 
     /** Verifica si existe un usuario*/
-    Mono<Boolean> existsByCorreo(String correo);
+    Mono<Boolean> existsByEmail(String correo);
 
     /** Persiste un nuevo usuario y devuelve el agregado con id asignado. */
     Mono<Usuario> save(Usuario usuario);

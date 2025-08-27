@@ -3,26 +3,46 @@ package co.com.pragma.autenticacion.api;
 import co.com.pragma.autenticacion.model.usuario.Usuario;
 import co.com.pragma.autenticacion.usecase.usuario.UsuarioUseCase;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
+import org.springframework.transaction.reactive.TransactionalOperator;
 
 @Component
 @RequiredArgsConstructor
 public class Handler {
 
-private  final UsuarioUseCase usuarioUseCase;
+    private static final Logger log = LoggerFactory.getLogger(Handler.class);
+    private final TransactionalOperator transactionalOperator;
+    private final UsuarioUseCase usuarioUseCase; // o tu fachada/repos
 
+    public Mono<ServerResponse> listenSaveUsuario(ServerRequest req) {
 
-    public Mono<ServerResponse> listenSaveUsuario(ServerRequest serverRequest) {
-        return serverRequest.bodyToMono(Usuario.class)
+        log.debug("registrar-usuario:request:start path={} method={}",
+                req.path(), req.methodName());
+
+        return req.bodyToMono(Usuario.class)
+                .doOnNext(u -> log.debug("registrar-usuario:payload email={}", u.getEmail()))
                 .flatMap(usuarioUseCase::saveUsuario)
-                .flatMap(savedTask -> ServerResponse.ok()
+                .as(transactionalOperator::transactional)
+                .flatMap(saved -> ServerResponse
+                        .created(req.uriBuilder().path("/{id}").build(saved.getIdUsuario()))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(savedTask));
+                        .bodyValue(saved));
     }
+
+
+//    public Mono<ServerResponse> listenSaveUsuario(ServerRequest serverRequest) {
+//        return serverRequest.bodyToMono(Usuario.class)
+//                .flatMap(usuarioUseCase::saveUsuario)
+//                .flatMap(savedTask -> ServerResponse.ok()
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .bodyValue(savedTask));
+//    }
 
     public Mono<ServerResponse> listenGETUseCase(ServerRequest serverRequest) {
         // useCase.logic();
