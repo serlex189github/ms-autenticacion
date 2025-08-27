@@ -35,3 +35,4 @@ sonar {
 }
 
 apply from: './main.gradle'
+version = '1.0.0'
