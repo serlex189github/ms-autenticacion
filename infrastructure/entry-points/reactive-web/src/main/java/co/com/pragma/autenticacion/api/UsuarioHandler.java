@@ -1,6 +1,7 @@
 package co.com.pragma.autenticacion.api;
 
 import co.com.pragma.autenticacion.model.usuario.Usuario;
+import co.com.pragma.autenticacion.model.usuario.UsuarioFactory;
 import co.com.pragma.autenticacion.usecase.usuario.UsuarioUseCase;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -14,9 +15,9 @@ import org.springframework.transaction.reactive.TransactionalOperator;
 
 @Component
 @RequiredArgsConstructor
-public class Handler {
+public class UsuarioHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(Handler.class);
+    private static final Logger log = LoggerFactory.getLogger(UsuarioHandler.class);
     private final TransactionalOperator transactionalOperator;
     private final UsuarioUseCase usuarioUseCase; // o tu fachada/repos
 
@@ -27,6 +28,10 @@ public class Handler {
 
         return req.bodyToMono(Usuario.class)
                 .doOnNext(u -> log.debug("registrar-usuario:payload email={}", u.getEmail()))
+                .map(r -> UsuarioFactory.create(
+                        r.getNombre(), r.getApellido(), r.getFechaNacimiento(),
+                        r.getDireccion(), r.getTelefono(), r.getEmail(),
+                        r.getSalarioBase(), r.getIdRol()))
                 .flatMap(usuarioUseCase::saveUsuario)
                 .as(transactionalOperator::transactional)
                 .flatMap(saved -> ServerResponse
@@ -34,15 +39,6 @@ public class Handler {
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(saved));
     }
-
-
-//    public Mono<ServerResponse> listenSaveUsuario(ServerRequest serverRequest) {
-//        return serverRequest.bodyToMono(Usuario.class)
-//                .flatMap(usuarioUseCase::saveUsuario)
-//                .flatMap(savedTask -> ServerResponse.ok()
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .bodyValue(savedTask));
-//    }
 
     public Mono<ServerResponse> listenGETUseCase(ServerRequest serverRequest) {
         // useCase.logic();
