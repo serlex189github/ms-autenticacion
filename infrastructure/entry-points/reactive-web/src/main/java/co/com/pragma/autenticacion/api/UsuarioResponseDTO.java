@@ -1,16 +1,16 @@
 package co.com.pragma.autenticacion.api;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public record RegistrarUsuarioRequest(
+public record UsuarioResponseDTO(
+        String idUsuario,
         String nombre,
         String apellido,
-        String documentoIdentidad,
-        LocalDate fechaNacimiento,
-        String direccion,
-        String telefono,
         String email,
-        BigDecimal salarioBase,
-        Integer idRol
+        String documentoIdentidad,
+        String direccion,
+        LocalDate fechaNacimiento,
+        String telefono,
+        Long salarioBase,
+        String rolNombre
 ) {}
