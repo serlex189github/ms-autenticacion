@@ -1,8 +1,12 @@
 package co.com.pragma.autenticacion.api;
 
-import co.com.pragma.autenticacion.model.usuario.Usuario;
+import co.com.pragma.autenticacion.api.mapper.UsuarioMapper;
 import co.com.pragma.autenticacion.model.usuario.UsuarioFactory;
 import co.com.pragma.autenticacion.usecase.usuario.UsuarioUseCase;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,43 +23,28 @@ public class UsuarioHandler {
 
     private static final Logger log = LoggerFactory.getLogger(UsuarioHandler.class);
     private final TransactionalOperator transactionalOperator;
-    private final UsuarioUseCase usuarioUseCase; // o tu fachada/repos
+    private final UsuarioUseCase usuarioUseCase;
+    private final UsuarioMapper usuarioMapper;
 
-//    public Mono<ServerResponse> listenSaveUsuario(ServerRequest req) {
-//
-//        log.debug("registrar-usuario:request:start path={} method={}",
-//                req.path(), req.methodName());
-//
-//        return req.bodyToMono(Usuario.class)
-//                .doOnNext(u -> log.debug("registrar-usuario:payload email={}", u.getEmail()))
-//                .map(r -> UsuarioFactory.create(
-//                        r.getNombre(), r.getApellido(), r.getFechaNacimiento(),
-//                        r.getDireccion(), r.getTelefono(), r.getEmail(),
-//                        r.getSalarioBase(), r.getIdRol()))
-//                .flatMap(usuarioUseCase::saveUsuario)
-//                .as(transactionalOperator::transactional)
-//                .flatMap(saved -> ServerResponse
-//                        .created(req.uriBuilder().path("/{id}").build(saved.getIdUsuario()))
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .bodyValue(saved));
-//    }
-
+    @Operation(
+            summary = "Registrar usuario",
+            description = "Recibe un objeto UsuarioRequestDTO y guarda un usuario en el sistema",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Usuario guardado correctamente"),
+                    @ApiResponse(responseCode = "400", description = "Error de validación",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode = "500", description = "Error interno",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = String.class)))
+            }
+    )
     public Mono<ServerResponse> listenSaveUsuario(ServerRequest req) {
         log.debug("registrar-usuario:request:start path={} method={}", req.path(), req.method().name());
 
-        return req.bodyToMono(RegistrarUsuarioRequest.class)
+        return req.bodyToMono(UsuarioRequestDTO.class)
                 .doOnNext(r -> log.debug("registrar-usuario:payload email={}", r.email()))
-                .map(r -> UsuarioFactory.create(
-                        r.nombre(),
-                        r.apellido(),
-                        r.fechaNacimiento(),
-                        r.direccion(),
-                        r.telefono(),
-                        r.email(),
-                        r.documentoIdentidad(),
-                        r.salarioBase(),
-                        r.idRol()
-                ))
+                .map(usuarioMapper::toDomain)
                 .flatMap(usuarioUseCase::saveUsuario)
                 .as(transactionalOperator::transactional)
                 .flatMap(saved -> ServerResponse
