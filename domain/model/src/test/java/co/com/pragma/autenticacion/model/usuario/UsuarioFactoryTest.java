@@ -39,7 +39,7 @@ class UsuarioFactoryTest {
         assertThat(usuario.getEmail()).isEqualTo("juan.perez@mail.com");
 
         // Campos opcionales: no deben convertirse a vacío
-        assertThat(usuario.getDireccion()).isEqualTo(" Calle 123 "); // la factory no trimmea dir/tel
+        assertThat(usuario.getDireccion()).isEqualTo(" Calle 123 ");
         assertThat(usuario.getTelefono()).isEqualTo(" 3001112233 ");
 
         // Resto de campos
